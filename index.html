@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skylite Video Player</title>
+
+    <!-- Video.js Library and Styles -->
+    <link href="https://vjs.zencdn.net/7.17.0/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/7.17.0/video.min.js" defer></script>
+
+    <!-- Video.js Quality Levels Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@2.1.0/dist/videojs-contrib-quality-levels.min.js" defer></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+                
+        .time-display-container {
+            font-size: 10px !important;
+            white-space: nowrap !important;
+            display: flex !important;
+            gap: 1px !important;
+            margin-top: 1% !important;
+            margin-left: 2px !important;
+            align-items: center !important;
+            display: none !important;
+        }
+
+        .video-js .vjs-play-progress:before {
+            font-size: 0.9em;
+            position: absolute;
+            right: -0.5em;
+            top: 0 !important;
+            z-index: 1;
+            background: #2196f3 !important;
+        }
+
+        .vjs-slider-horizontal .vjs-volume-level:before {
+            top: 0 !important;
+            right: -0.5em;
+        }
+
+
+        .video-js .vjs-time-control {
+            flex: none;
+            font-size: 1em;
+            line-height: 3em;
+            min-width: 0.7em !important;
+            width: auto;
+            padding-left: 0em !important;
+            padding-right: 0.3em !important;
+            display: block !important;
+        }
+
+        button.vjs-resolution-button.vjs-control.vjs-button {
+            display: none !important;
+        }
+
+
+        @supports (display: grid) {
+            .vjs-text-track-settings .vjs-modal-dialog-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr;
+                padding: 20px 24px 0px 24px;
+                background: #000 !important;
+            }
+        }
+
+        .vjs-text-track-settings legend {
+            color: #fff;
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            font-weight: 600 !important;
+        }
+
+        button.vjs-close-button.vjs-control.vjs-button {
+            color: #fff !important;
+        }
+
+        button.vjs-default-button {
+            background: #fff !important;
+            color: #000 !important;
+            padding: 1px 10px !important;
+        }
+        button.vjs-done-button {
+            background: #fff !important;
+            color: #000 !important;
+            padding: 1px 10px !important;
+        }
+
+        .vjs-text-track-settings fieldset span > select {
+            max-width: 7.3em;
+            border: none;
+            background: #ccc;
+            padding: 1px 10px;
+            align-items: center;
+            display: flex;
+            font-size: 12px;
+            color: #000;
+            border-radius: 2px;
+        }
+
+        .vjs-track-setting > select {
+            margin-right: 1em;
+            margin-bottom: 0.5em;
+            max-width: 7.3em;
+            border: none;
+            background: #ccc !important;
+            padding: 1px 10px;
+            align-items: center;
+            display: flex;
+            font-size: 12px;
+            color: #000 !important;
+            border-radius: 2px;
+        }
+
+        .vjs-modal-dialog.vjs-text-track-settings {
+            background-color: #2B333F;
+            background-color: rgba(43, 51, 63, 0.75);
+            color: #fff;
+            height: 100% !important;
+            background: #000 !important;
+        }
+
+
+        .vjs-play-progress.vjs-slider-bar {
+            background: #2196f3 !important;
+        }
+
+        .vjs-slider-horizontal .vjs-volume-level {
+            height: 0.3em;
+            background: #2196f3 !important;
+        }
+
+        .vjs-menu-button-popup .vjs-menu .vjs-menu-content {
+            background-color: #2B333F;
+            background-color: rgba(43, 51, 63, 0.7);
+            position: absolute;
+            width: 100%;
+            bottom: 1.6em !important;
+            max-height: 15em;
+            background: #000 !important;
+            padding: 5px !important;
+            padding-bottom: 10px !important;
+            border-radius: 10px !important;
+            padding-top: 10px !important;
+        }
+
+        .vjs-menu .vjs-menu-content > * {
+            box-sizing: border-box;
+            margin-top: 5px !important;
+            font-size: 12px !important;
+        }
+
+
+
+
+
+        .vjs-icon-play:before, .video-js .vjs-play-control .vjs-icon-placeholder:before, .video-js .vjs-big-play-button .vjs-icon-placeholder:before {
+            content: "\f101";
+            /* color: #2196f3 !important; */
+            /* border: 2px solid #fff; */
+            /* border-radius: 50%; */
+            /* height: auto; */
+            /* width: fit-content; */
+            font-size: 1.7rem;
+            justify-content: center;
+            display: grid;
+            display: flex;
+            align-items: center;
+        /* background: #2196f3;*/
+            border-radius: 100px;
+            height: 1.7rem !important;
+            width: 1.7rem !important;
+            margin-left: 10px;
+            margin-top: 1px !important;
+        }
+
+
+
+        .video-js .vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal {
+            transition: visibility 1s, opacity 1s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s;
+            /* background: #000 !important; */
+            color: #2196f3 !important;
+        }
+        .video-container {
+            justify-content: center;
+        }
+
+        #skylite-video {
+            aspect-ratio: 16/9 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Container -->
+     <div class="video-container">
+        <video id="skylite-video" class="video-js vjs-default-skin" controls preload="auto" ></video>
+     </div>
+
+    <script>
+        function skyliteVideoPlayer(playerId, videoSrc, videoList, adTagUrl) {
+            var player = videojs(playerId, {
+                controls: true,
+                autoplay: false,
+                preload: 'auto',
+                fluid: true,
+                playbackRates: [0.5, 1, 1.5, 2],
+                controlBar: {
+                    volumePanel: true,
+                    fullscreenToggle: true,
+                    remainingTimeDisplay: false, // Disable the default remaining time display
+                    playbackRateMenuButton: false
+                },
+            });
+
+            // Prevent default right-click context menu
+            player.on('contextmenu', function(event) {
+                event.preventDefault();
+            });
+
+            // Set the video source
+            player.src({
+                src: videoSrc,
+                type: 'application/x-mpegURL'
+            });
+
+            // Add custom remaining time and total time display when the player is ready
+            // Add custom remaining time and total time display when the player is ready
+            player.ready(function () {
+                // Create a container for remaining time and total time
+                var timeDisplayContainer = player.controlBar.addChild('Component', {}, 0);
+                timeDisplayContainer.addClass('time-display-container');
+
+                // Add remaining time display first
+                var remainingTimeDisplay = timeDisplayContainer.addChild('Component', {}, 0);
+                remainingTimeDisplay.addClass('vjs-remaining-time');
+
+                // Add separator between remaining time and total time
+                var separator = timeDisplayContainer.addChild('Component', {}, 1);
+                separator.addClass('vjs-time-separator');
+                separator.el().innerHTML = ' / ';
+
+                // Add total duration display after the remaining time
+                var totalTimeDisplay = timeDisplayContainer.addChild('Component', {}, 2);
+                totalTimeDisplay.addClass('vjs-duration-display');
+
+                // Update remaining time and total time dynamically
+                player.on('timeupdate', function () {
+                    var remainingTime = player.remainingTime();
+                    var totalTime = player.duration();
+                    remainingTimeDisplay.el().innerHTML = '-' + formatTime(remainingTime);
+                    totalTimeDisplay.el().innerHTML = formatTime(totalTime);
+                });
+            });
+
+            // Function to format time in hh:mm:ss format
+            function formatTime(seconds) {
+                var date = new Date(null);
+                date.setSeconds(seconds);
+                var timeString = date.toISOString().substr(11, 8);
+                return timeString.startsWith('00:') ? timeString.substr(3) : timeString;
+            }
+
+            // Create resolution button
+            // Create resolution button
+            var resolutionButton = document.createElement('button');
+            resolutionButton.classList.add('vjs-resolution-button', 'vjs-control', 'vjs-button');
+            resolutionButton.innerHTML = '<i class="fas fa-cog video-resolution-icon"></i>';
+            player.controlBar.el().appendChild(resolutionButton);
+
+            // Create resolution menu
+            var resolutionMenu = document.createElement('ul');
+            resolutionMenu.classList.add('vjs-resolution-menu');
+            resolutionButton.appendChild(resolutionMenu);
+
+            // Speed Control Item
+            var speedControlItem = document.createElement('li'); 
+            speedControlItem.innerHTML = '<div class="video-speed-control-container"><i class="fa-solid fa-sliders speed-control-icon"></i> Speed Control <i class="fa fa-angle-down angle-down-video-speed"></i></div>';
+            resolutionMenu.appendChild(speedControlItem);
+
+            // Quality Control Item
+            var qualityControlItem = document.createElement('li');
+            qualityControlItem.innerHTML = '<div class="video-quality-control-container"> <i class="fa-regular fa-circle-play quality-control-icon"></i> Quality Control <i class="fa fa-angle-down angle-down-video-quality"></i></div>';
+            resolutionMenu.appendChild(qualityControlItem);
+
+            // Speed Menu
+            // Speed Menu
+            var speedMenu = document.createElement('ul');
+            speedMenu.classList.add('vjs-submenu');
+            speedMenu.id = 'video-speed';  // Fixed ID for speed menu
+
+            // Updated speeds array to meet the objective
+            var speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+            
+            speeds.forEach(function(speed) {
+                var speedOption = document.createElement('li');
+                speedOption.innerHTML = speed === 1 ? 'Normal' : `${speed}x`;
+                speedOption.dataset.value = speed;
+
+                // Set the initial tick mark on Normal speed (1x)
+                if (speed === 1) {
+                    speedOption.innerHTML = 'Normal ✓'; // Mark "Normal" as the default speed
+                }
+
+                speedOption.addEventListener('click', function (event) {
+                    event.stopPropagation();  // Prevent resolutionMenu from closing
+                    // Remove tick mark from all options
+                    speedMenu.querySelectorAll('li').forEach(function (item) {
+                        item.innerHTML = item.dataset.value === '1' ? 'Normal' : item.dataset.value + 'x';
+                    });
+
+                    // Add tick mark to the selected option
+                    speedOption.innerHTML = speed === 1 ? 'Normal ✓' : `${speed}x ✓`;
+
+                    // Set the video playback speed
+                    player.playbackRate(speed);
+                });
+
+                speedMenu.appendChild(speedOption);
+            });
+            speedControlItem.appendChild(speedMenu);
+
+
+            // Quality Menu
+            var qualityMenu = document.createElement('ul');
+            qualityMenu.classList.add('vjs-submenu');
+            qualityMenu.id = 'video-quality';  // Fixed ID for quality menu
+
+            // Add "Auto" quality option
+            var autoQualityOption = document.createElement('li');
+            autoQualityOption.innerHTML = 'Auto';
+            autoQualityOption.dataset.value = 'auto';
+            autoQualityOption.addEventListener('click', function (event) {
+                event.stopPropagation();  // Prevent resolutionMenu from closing
+                // Remove tick mark from all options
+                qualityMenu.querySelectorAll('li').forEach(function (item) {
+                    item.innerHTML = item.dataset.value === 'auto' ? 'Auto' : item.dataset.value + 'p';
+                });
+                // Add tick mark to the selected option
+                autoQualityOption.innerHTML = 'Auto ✓';
+
+                // Enable all quality levels for auto mode
+                var qualityLevels = player.qualityLevels();
+                for (var i = 0; i < qualityLevels.length; i++) {
+                    qualityLevels[i].enabled = true;
+                }
+            });
+            qualityMenu.appendChild(autoQualityOption);
+            qualityControlItem.appendChild(qualityMenu);
+
+            var qualityLevels = player.qualityLevels();
+            qualityLevels.on('addqualitylevel', function () {
+                qualityMenu.innerHTML = ''; // Clear the menu and re-add "Auto" option
+                qualityMenu.appendChild(autoQualityOption);
+
+                // Set "Auto" as the default active option with the tick mark initially
+                autoQualityOption.innerHTML = 'Auto ✓';
+
+                for (var i = 0; i < qualityLevels.length; i++) {
+                    let qualityLevel = qualityLevels[i];
+                    let qualityOption = document.createElement('li');
+                    qualityOption.innerHTML = `${qualityLevel.height ? qualityLevel.height + 'p' : 'Auto'}`;
+                    qualityOption.dataset.value = qualityLevel.height ? `${qualityLevel.height}` : 'auto';
+
+                    qualityOption.addEventListener('click', (function (levelIndex) {
+                        return function (event) {
+                            event.stopPropagation();  // Prevent resolutionMenu from closing
+                            // Remove tick mark from all options
+                            qualityMenu.querySelectorAll('li').forEach(function (item) {
+                                item.innerHTML = item.dataset.value === 'auto' ? 'Auto' : item.dataset.value + 'p';
+                            });
+
+                            // Add tick mark to the selected option
+                            qualityOption.innerHTML = `${qualityLevel.height}p ✓`;
+
+                            // Enable only the selected quality level
+                            for (var j = 0; j < qualityLevels.length; j++) {
+                                qualityLevels[j].enabled = (j === levelIndex);
+                            }
+                        };
+                    })(i));
+                    qualityMenu.appendChild(qualityOption);
+                }
+            });
+
+            // Toggle submenus and icons
+            function toggleSubMenu(menu, controlItem) {
+                const isActive = menu.classList.contains('active');
+                
+                // Close all other submenus
+                document.querySelectorAll('.vjs-submenu').forEach(function (submenu) {
+                    submenu.classList.remove('active');
+                    submenu.parentElement.querySelector('.fa-angle-up')?.classList.replace('fa-angle-up', 'fa-angle-down');
+                });
+
+                // Toggle the clicked submenu and icon
+                if (isActive) {
+                    menu.classList.remove('active');
+                    controlItem.querySelector('.fa-angle-up').classList.replace('fa-angle-up', 'fa-angle-down');
+                } else {
+                    menu.classList.add('active');
+                    controlItem.querySelector('.fa-angle-down').classList.replace('fa-angle-down', 'fa-angle-up');
+                }
+            }
+
+            // Speed Control toggle
+            speedControlItem.addEventListener('click', function (event) {
+                event.stopPropagation();  // Prevent resolutionMenu from closing
+                toggleSubMenu(speedMenu, speedControlItem);
+            });
+
+            // Quality Control toggle
+            qualityControlItem.addEventListener('click', function (event) {
+                event.stopPropagation();  // Prevent resolutionMenu from closing
+                toggleSubMenu(qualityMenu, qualityControlItem);
+            });
+
+            // Toggle the main resolution menu
+            resolutionButton.addEventListener('click', function (event) {
+                event.stopPropagation();  // Prevent document click handler from closing it immediately
+                resolutionMenu.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!resolutionButton.contains(event.target) && !resolutionMenu.contains(event.target)) {
+                    resolutionMenu.classList.remove('active');
+                }
+            });
+
+
+
+            var currentVideoIndex = 0;
+            function loadVideoByIndex(index) {
+                if (index >= 0 && index < videoList.length) {
+                    currentVideoIndex = index;
+                    player.src({
+                        src: videoList[index],
+                        type: 'application/x-mpegURL'
+                    });
+                    player.play();
+                }
+            }
+
+            var autoplay = false;
+
+            // Autoplay Toggle Switch
+            var autoplaySwitch = document.createElement('label');
+            autoplaySwitch.classList.add('vjs-autoplay-switch');
+            autoplaySwitch.innerHTML = `
+                <div class="switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </div>
+            `;
+            autoplaySwitch.style.display = 'none'; // Hide initially
+            player.el().appendChild(autoplaySwitch);
+
+            autoplaySwitch.querySelector('input').addEventListener('change', function (event) {
+                autoplay = event.target.checked;
+            });
+
+            player.on('ended', function () {
+                if (autoplay) {
+                    loadVideoByIndex((currentVideoIndex + 1) % videoList.length);
+                }
+            });
+
+            var prevButton = document.createElement('button');
+            prevButton.classList.add('vjs-prev-button', 'vjs-control', 'vjs-button');
+            prevButton.innerHTML = '<i class="fa-solid fa-backward-step"></i>';
+            player.el().appendChild(prevButton);
+
+            prevButton.addEventListener('click', function () {
+                loadVideoByIndex(currentVideoIndex - 1);
+            });
+
+            var nextButton = document.createElement('button');
+            nextButton.classList.add('vjs-next-button', 'vjs-control', 'vjs-button');
+            nextButton.innerHTML = '<i class="fa-solid fa-forward-step"></i>';
+            player.el().appendChild(nextButton);
+
+            nextButton.addEventListener('click', function () {
+                loadVideoByIndex(currentVideoIndex + 1);
+            });
+
+            var miniPlayerButton = player.controlBar.getChild('PictureInPictureToggle');
+            var fullscreenButton = player.controlBar.getChild('FullscreenToggle');
+
+            if (miniPlayerButton && fullscreenButton) {
+                resolutionButton.after(miniPlayerButton.el());
+                miniPlayerButton.el().after(fullscreenButton.el());
+            }
+
+            loadVideoByIndex(currentVideoIndex);
+
+            // Show autoplay switch when user interacts with the player
+            function showAutoplaySwitch() {
+                autoplaySwitch.style.display = 'block';
+            }
+
+            // Hide autoplay switch when no interaction is detected
+            function hideAutoplaySwitch() {
+                autoplaySwitch.style.display = 'none';
+            }
+
+            // Timeout for hiding autoplay switch after interaction
+            let hideTimeout;
+            function resetHideTimeout() {
+                clearTimeout(hideTimeout);
+                hideTimeout = setTimeout(hideAutoplaySwitch, 3000); // Hide after 3 seconds of inactivity
+            }
+
+            player.on('play', showAutoplaySwitch);
+            player.on('pause', showAutoplaySwitch);
+            player.on('mousemove', function () {
+                showAutoplaySwitch();
+                resetHideTimeout();
+            });
+            player.on('userinactive', hideAutoplaySwitch);
+
+            // Create the subtitle button in the control bar
+            var subtitleButton = document.createElement('button');
+            subtitleButton.classList.add('vjs-subtitle-button', 'vjs-control', 'vjs-button');
+            subtitleButton.innerHTML = '<i id="sub-title-icon" class="fa-regular fa-closed-captioning"></i>'; // Initial icon indicating subtitles are off
+            player.controlBar.el().appendChild(subtitleButton);
+
+            var subtitleTrackLoaded = false; // Flag to track if subtitles are loaded
+
+            // Function to add subtitle tracks to the player
+            function loadSubtitleTrack(label, srcLang, src) {
+                if (!subtitleTrackLoaded) {
+                    player.addRemoteTextTrack({
+                        kind: 'subtitles',
+                        label: label,
+                        srclang: srcLang,
+                        src: src,
+                        default: true
+                    }, false);
+                    subtitleTrackLoaded = true; // Mark that subtitles are now loaded
+                }
+            }
+
+            // Load subtitle tracks when the user clicks the subtitle button for the first time
+            subtitleButton.addEventListener('click', function () {
+                // Lazy load the subtitles on first click to improve initial load performance
+                if (!subtitleTrackLoaded) {
+                    loadSubtitleTrack('English', 'en', 'https://gist.githubusercontent.com/jimzimmerman/776cd9f344cf41691d732c5f13f8abf0/raw/fe6d9124e3e861b879ad711f925ee260acdf5f53/subtitles-en.vtt'); // Sample subtitle file
+                }
+
+                // Toggle subtitles on/off more efficiently
+                var tracks = player.textTracks();
+                for (var i = 0; i < tracks.length; i++) {
+                    if (tracks[i].kind === 'subtitles') {
+                        if (tracks[i].mode === 'showing') {
+                            tracks[i].mode = 'disabled'; // Hide subtitles
+                            subtitleButton.innerHTML = '<i class="fa-regular fa-closed-captioning"></i>'; // Update icon to indicate subtitles are off
+                        } else {
+                            tracks[i].mode = 'showing'; // Show subtitles
+                            subtitleButton.innerHTML = '<i class="fa-solid fa-closed-captioning"></i>'; // Update icon to indicate subtitles are on
+                        }
+                    }
+                }
+            });
+
+            // Variables to track touch positions
+            // Variables to track touch positions
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchEndX = 0;
+            let touchEndY = 0;
+            const TAP_THRESHOLD = 10; // Threshold for detecting tap, adjust as needed
+            const DOUBLE_TAP_DELAY = 300; // Maximum delay between taps for double-tap detection
+            let lastTapTime = 0; // To store the time of the last tap
+            let overlayTimeout; // To control how long the overlay stays visible
+
+            // Declare controlBarTimeout variable to avoid conflicts
+            var controlBarTimeout;
+
+            // Function to show the control bar and elements
+            function showControlBar() {
+                player.controlBar.show();
+                player.userActive(true); // Ensures controls are shown
+            }
+
+            // Function to update the play/pause icon based on video state
+            function updatePlayPauseIcon() {
+                if (player.paused()) {
+                    player.controlBar.playToggle.controlText('Play');  // Show play icon
+                } else {
+                    player.controlBar.playToggle.controlText('Pause'); // Show pause icon
+                }
+            }
+
+            // Function to show the forward/backward overlay message
+            function showOverlayMessage(message) {
+                // Get or create the overlay element
+                let overlay = document.getElementById('video-overlay-message');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'video-overlay-message';
+                    overlay.style.position = 'absolute';
+                    overlay.style.top = '50%';
+                    overlay.style.left = '50%';
+                    overlay.style.transform = 'translate(-50%, -50%)';
+                    overlay.style.color = 'white';
+                    overlay.style.fontSize = '24px';
+                    overlay.style.fontWeight = 'bold';
+                    overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+                    overlay.style.padding = '10px 20px';
+                    overlay.style.borderRadius = '5px';
+                    overlay.style.zIndex = '1000';
+                    overlay.style.pointerEvents = 'none'; // So it doesn't block any interaction
+                    player.el().appendChild(overlay);
+                }
+
+                // Update the overlay message
+                overlay.textContent = message;
+
+                // Clear any previous timeout and set a new one to hide the overlay after 1 second
+                clearTimeout(overlayTimeout);
+                overlayTimeout = setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1000);
+
+                // Make sure the overlay is visible
+                overlay.style.display = 'block';
+            }
+
+            // Add touchstart event listener to capture the initial touch position
+            player.el().addEventListener('touchstart', function(event) {
+                const touch = event.touches[0];
+                touchStartX = touch.screenX;
+                touchStartY = touch.screenY;
+
+                // Show control bar when touch starts
+                showControlBar();
+            });
+
+            // Add touchend event listener to detect if the movement qualifies as a double-tap
+            player.el().addEventListener('touchend', function(event) {
+                const touch = event.changedTouches[0];
+                touchEndX = touch.screenX;
+                touchEndY = touch.screenY;
+
+                const deltaX = Math.abs(touchEndX - touchStartX);
+                const deltaY = Math.abs(touchEndY - touchStartY);
+
+                const targetElement = event.target;
+
+                const ignoredSelectors = [
+                    '.vjs-volume-panel',
+                    '.vjs-resolution-button',
+                    '.vjs-fullscreen-control',
+                    '.vjs-picture-in-picture-control',
+                    '.vjs-subtitle-button',
+                    '.vjs-autoplay-switch',
+                    '.vjs-control-bar',
+                    '.vjs-play-control',
+                    '.vjs-mute-control',
+                    '.vjs-progress-control'
+                ];
+
+                const isIgnoredElement = ignoredSelectors.some(selector => targetElement.closest(selector));
+
+                const currentTime = new Date().getTime();
+                const timeSinceLastTap = currentTime - lastTapTime;
+
+                if (!isIgnoredElement && deltaX < TAP_THRESHOLD && deltaY < TAP_THRESHOLD) {
+                    if (timeSinceLastTap < DOUBLE_TAP_DELAY) {
+                        // It's a double-tap
+                        const playerWidth = player.el().clientWidth;
+                        const tapPosition = touchEndX / playerWidth; // Normalize touch position to [0, 1]
+
+                        if (tapPosition < 0.5) {
+                            // Double-tap on the left side (backward)
+                            player.currentTime(Math.max(0, player.currentTime() - 10)); // Backward 10 seconds
+                            showOverlayMessage('-10s'); // Show backward overlay
+                        } else {
+                            // Double-tap on the right side (forward)
+                            player.currentTime(Math.min(player.duration(), player.currentTime() + 10)); // Forward 10 seconds
+                            showOverlayMessage('+10s'); // Show forward overlay
+                        }
+                    }
+                    lastTapTime = currentTime;
+                } else {
+                    // If it's a swipe or unintentional touch, just show the control bar
+                    showControlBar();
+                }
+            });
+
+            // Update play/pause icon when the video state changes
+            player.on('pause', updatePlayPauseIcon);
+            player.on('play', updatePlayPauseIcon);
+
+            // Ensure the control bar stays visible when there's any user interaction
+            player.on('mousemove', showControlBar);
+            player.on('touchmove', showControlBar);
+
+            // Optionally, hide the control bar after a period of inactivity
+            function resetControlBarTimeout() {
+                clearTimeout(controlBarTimeout);
+                controlBarTimeout = setTimeout(() => player.userActive(false), 5000); // Hide after 5 seconds of inactivity
+            }
+            player.on('useractive', resetControlBarTimeout);
+
+
+
+
+            // Adding keyboard event listeners for play/pause, forward, and backward
+            document.addEventListener('keydown', function(event) {
+                if (event.target.tagName.toLowerCase() !== 'input' && event.target.tagName.toLowerCase() !== 'textarea') {
+                    switch (event.key) {
+                        case ' ':
+                            event.preventDefault();
+                            if (player.paused()) {
+                                player.play();
+                            } else {
+                                player.pause();
+                            }
+                            break;
+                        case 'ArrowRight':
+                            event.preventDefault();
+                            player.currentTime(player.currentTime() + 10); // Forward 10 seconds
+                            break;
+                        case 'ArrowLeft':
+                            event.preventDefault();
+                            player.currentTime(player.currentTime() - 10); // Backward 10 seconds
+                            break;
+                        case 'n':
+                            event.preventDefault();
+                            loadVideoByIndex(currentVideoIndex + 1); // Next video
+                            break;
+                        case 'p':
+                            event.preventDefault();
+                            loadVideoByIndex(currentVideoIndex - 1); // Previous video
+                            break;
+                    }
+                }
+            });
+
+
+            return player;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var videoList = [
+                'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+                'https://mtoczko.github.io/hls-test-streams/test-vtt/playlist.m3u8',  // HLS with VTT Subtitles
+                'https://mtoczko.github.io/hls-test-streams/test-gap/playlist.m3u8',  // HLS Stream with subtitle gap testing
+                'https://playertest.longtailvideo.com/adaptive/oceans_aes/oceans_aes.m3u8',  // AES encrypted stream with subtitles
+                'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+                'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8', // Video with built-in subtitles           
+            ];
+
+            skyliteVideoPlayer('skylite-video', videoList[0], videoList, 'https://example.com/adtag.m3u8');
+        });
+    </script>
+
+</body>
+</html>
